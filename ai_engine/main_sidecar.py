@@ -1,6 +1,6 @@
 """
 SAVA Python AI Sidecar Service
-Receives JSON IPC requests from Rust core via STDIN and dispatches to Encoder/Decoder AI engines.
+Receives JSON IPC requests from Rust core via STDIN and dispatches to Binary Track AI engines.
 """
 
 import sys
@@ -17,30 +17,30 @@ def main():
     try:
         req = json.loads(raw_input)
         cmd = req.get("command")
-        
+
         if cmd == "encode":
             encoder = SAVAEncoderAI()
-            encoder.extract_features(
+            encoder.extract_binary_tracks(
                 input_video_path=req["input_video"],
-                output_config_path=req["output_config_path"],
+                temp_dir=req["output_config_path"], # Pass temp directory for 10 binary tracks
                 sample_rate=req.get("sample_rate", 1)
             )
             response = {
                 "status": "SUCCESS",
-                "message": "AI Encoding feature extraction completed.",
+                "message": "AI Binary track extraction completed.",
                 "payload": None
             }
         elif cmd == "decode":
             decoder = SAVADecoderAI()
-            decoder.restore_video(
+            decoder.restore_video_from_binary_tracks(
+                temp_dir=req["helper_config_path"], # Pass temp directory containing binary tracks
                 lowres_video_path=req["lowres_video"],
-                helper_config_path=req["helper_config_path"],
                 output_video_path=req["output_video"],
                 target_resolution=tuple(req.get("target_resolution", [3840, 2160]))
             )
             response = {
                 "status": "SUCCESS",
-                "message": "AI Generative Restoration completed.",
+                "message": "AI Generative Restoration completed from binary tracks.",
                 "payload": None
             }
         else:

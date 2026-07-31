@@ -1,3 +1,19 @@
+// ============================================================================
+// Module: SAVAUnpacker (.sava Binary Container Reader)
+// Single Responsibility: Unpacks .sava archive into 10 modular binary tracks & metadata.
+//
+// EXAMPLE JSON OUTPUT SCHEMA (Status output after unpacking):
+// {
+//   "status": "SUCCESS",
+//   "code": 200,
+//   "message": "Unpacked 10 binary tracks from .sava container",
+//   "data": {
+//     "extracted_components": 10
+//   },
+//   "error_details": null
+// }
+// ============================================================================
+
 use anyhow::{Context, Result};
 use std::collections::HashMap;
 use std::fs::{self, File};
@@ -8,7 +24,7 @@ use zip::ZipArchive;
 pub struct SAVAUnpacker;
 
 impl SAVAUnpacker {
-    /// Unpacks a `.sava` container file into a target directory.
+    /// Unpacks all binary tracks and metadata.json from a `.sava` container file.
     pub fn unpack<P: AsRef<Path>>(
         sava_path: P,
         output_dir: P,
@@ -40,7 +56,7 @@ impl SAVAUnpacker {
         }
 
         println!(
-            "[SAVA Rust Container] Unpacked {} components from {:?}",
+            "[SAVA Rust Container] Unpacked {} binary track components from {:?}",
             extracted_files.len(),
             sava_path.as_ref()
         );

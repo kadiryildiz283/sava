@@ -1,16 +1,16 @@
 // ============================================================================
 // Module: SAVA CLI & Core Entry Point
-// Single Responsibility: Command-line orchestration for SAVA Encoding & Decoding.
+// Single Responsibility: Command-line orchestration for 10-Track Binary SAVA Encoding & Decoding.
 //
 // EXAMPLE JSON OUTPUT SCHEMA (Returned on stdout):
 // {
 //   "status": "SUCCESS",
 //   "code": 200,
-//   "message": "SAVA Encoding completed successfully",
+//   "message": "SAVA Encoding completed successfully with 10 binary tracks",
 //   "data": {
 //     "input_video": "kadir.mp4",
 //     "output_archive": "kadir.sava",
-//     "archive_size_mb": 0.15
+//     "archive_size_mb": 51.9
 //   },
 //   "error_details": null
 // }
@@ -35,7 +35,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Encodes a 4K video into a compressed .sava semantic archive
+    /// Encodes a 4K video into a compressed .sava semantic archive with 10 binary tracks
     Encode {
         #[arg(short, long)]
         input: PathBuf,
@@ -88,15 +88,15 @@ fn main() -> Result<()> {
             fs::create_dir_all(&temp_dir)?;
 
             let lowres_video_path = temp_dir.join("lowres_video.mp4");
-            let helper_config_path = temp_dir.join("helper_config.json");
+            let audio_path = temp_dir.join("audio.opus");
 
-            // 1. Downscale low-res skeleton video
-            MediaDownscaler::downscale_video(input, &lowres_video_path, target_width, target_height)?;
+            // 1. Downscale 72p skeleton video and extract audio.opus
+            MediaDownscaler::downscale_video_and_audio(input, &lowres_video_path, &audio_path, target_width, target_height)?;
 
-            // 2. Python AI Sidecar Extractor
+            // 2. Python AI Sidecar Extractor (Generates binary tracks in temp_dir)
             let resp = ai_client.request_encode(
                 input.to_str().unwrap(),
-                helper_config_path.to_str().unwrap(),
+                temp_dir.to_str().unwrap(),
                 cfg.codec.sample_rate,
             )?;
 
@@ -107,16 +107,38 @@ fn main() -> Result<()> {
                 return Ok(());
             }
 
-            // 3. Pack into .sava container
-            SAVAPacker::pack(output, &lowres_video_path, &helper_config_path, vec![])?;
+            // 3. Pack 10 binary tracks into .sava container
+            let motion_path = temp_dir.join("motion.bin");
+            let depth_path = temp_dir.join("depth.bin");
+            let object_path = temp_dir.join("object.bin");
+            let face_path = temp_dir.join("face.bin");
+            let ocr_path = temp_dir.join("ocr.bin");
+            let latent_path = temp_dir.join("latent.bin");
+            let helper_path = temp_dir.join("helper.bin");
+            let metadata_path = temp_dir.join("metadata.json");
+
+            let binary_tracks = vec![
+                ("lowres_video.mp4", lowres_video_path.as_path()),
+                ("audio.opus", audio_path.as_path()),
+                ("motion.bin", motion_path.as_path()),
+                ("depth.bin", depth_path.as_path()),
+                ("object.bin", object_path.as_path()),
+                ("face.bin", face_path.as_path()),
+                ("ocr.bin", ocr_path.as_path()),
+                ("latent.bin", latent_path.as_path()),
+                ("helper.bin", helper_path.as_path()),
+                ("metadata.json", metadata_path.as_path()),
+            ];
+
+            SAVAPacker::pack(output, binary_tracks)?;
 
             let archive_metadata = fs::metadata(output)?;
             let archive_size_mb = archive_metadata.len() as f64 / (1024.0 * 1024.0);
 
-            logger.log_action("ENCODE_SUCCESS", &format!("Archive Size: {:.2} MB", archive_size_mb));
+            logger.log_action("ENCODE_SUCCESS", &format!("10-Track Archive Size: {:.2} MB", archive_size_mb));
 
             let json_resp = JsonResponse::success(
-                "SAVA Encoding completed successfully",
+                "SAVA Encoding completed successfully with 10 binary tracks",
                 Some(serde_json::json!({
                     "input_video": input,
                     "output_archive": output,
@@ -131,19 +153,16 @@ fn main() -> Result<()> {
             let temp_dir = PathBuf::from(&cfg.storage.temp_decode_dir);
             fs::create_dir_all(&temp_dir)?;
 
-            // 1. Unpack .sava container
+            // 1. Unpack 10 binary tracks from .sava container
             let extracted = SAVAUnpacker::unpack(input, &temp_dir)?;
             let lowres_path = extracted
                 .get("lowres_video.mp4")
                 .ok_missing("lowres_video.mp4")?;
-            let config_path = extracted
-                .get("helper_config.json")
-                .ok_missing("helper_config.json")?;
 
-            // 2. Python AI Restoration Engine
+            // 2. Python AI Restoration Engine (Reads binary tracks from temp_dir)
             let resp = ai_client.request_decode(
                 lowres_path.to_str().unwrap(),
-                config_path.to_str().unwrap(),
+                temp_dir.to_str().unwrap(),
                 output.to_str().unwrap(),
                 (cfg.codec.default_target_width, cfg.codec.default_target_height),
             )?;
@@ -155,7 +174,7 @@ fn main() -> Result<()> {
                 return Ok(());
             }
 
-            logger.log_action("DECODE_SUCCESS", &format!("Restored 4K Video: {:?}", output));
+            logger.log_action("DECODE_SUCCESS", &format!("Restored 4K Video from binary tracks: {:?}", output));
 
             let json_resp = JsonResponse::success(
                 "SAVA Decoding completed successfully",

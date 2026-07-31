@@ -8,7 +8,8 @@ sava_temp_encode/
 sava_temp_decode/
 logs/
 
-# Video and archive binaries
+# Video, AVI and SAVA archive binaries (Ignored from Git)
+*.avi
 *.mp4
 *.sava
 *.db
