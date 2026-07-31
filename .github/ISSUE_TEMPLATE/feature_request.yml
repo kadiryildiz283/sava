@@ -1,0 +1,19 @@
+name: 💡 Özellik İsteği (Feature Request)
+description: SAVA mimarisine eklenmesini istediğiniz bir yenilik önerin
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: İhtiyaç veya Problem Nedir?
+      description: Bu özellik hangi sorunu çözüyor veya hangi yeni yeteneği kazandırıyor?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Önerilen Çözüm / Yaklaşım
+      description: Nasıl bir uygulanış düşünüyorsunuz? (Örn: Model eklenmesi, Rust kütüphanesi entegrasyonu)
+    validations:
+      required: true

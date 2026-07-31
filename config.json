@@ -1,0 +1,33 @@
+{
+  "system": {
+    "app_name": "sava",
+    "version": "0.1.0",
+    "environment": "production"
+  },
+  "codec": {
+    "default_lowres_width": 256,
+    "default_lowres_height": 144,
+    "default_target_width": 3840,
+    "default_target_height": 2160,
+    "sample_rate": 1,
+    "crf": 28,
+    "preset": "fast"
+  },
+  "storage": {
+    "temp_encode_dir": "./sava_temp_encode",
+    "temp_decode_dir": "./sava_temp_decode",
+    "db_path": "./sava_archive.db"
+  },
+  "logging": {
+    "log_dir": "./logs",
+    "max_file_size_mb": 10,
+    "retention_days": 7,
+    "compress_zstd": true,
+    "level": "info"
+  },
+  "ai_sidecar": {
+    "script_path": "ai_engine/main_sidecar.py",
+    "python_binary": "python3",
+    "timeout_sec": 120
+  }
+}

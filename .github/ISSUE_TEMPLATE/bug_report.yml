@@ -1,0 +1,37 @@
+name: 🐛 Hata Bildirimi (Bug Report)
+description: SAVA çalışırken karşılaştığınız bir hatayı veya çökmeyi bildirin
+title: "[BUG]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: SAVA sisteminde karşılaştığınız hatayı çözebilmemiz için lütfen detayları eksiksiz doldurun.
+  - type: textarea
+    id: description
+    attributes:
+      label: Hatanın Açıklaması
+      description: Karşılaştığınız hatayı net bir şekilde özetleyin.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Adım Adım Yeniden Üretme
+      description: Hatanın gerçekleşmesi için izlenen komutlar (örn: `sava encode ...`)
+      placeholder: |
+        1. `sava encode -i input.mp4 -o out.sava`
+        2. Çıktıda alınan hata mesajı...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Hata Logları & Terminal Çıktısı
+      description: Konsolda gördüğünüz hata çıktıları.
+      render: shell
+  - type: textarea
+    id: environment
+    attributes:
+      label: Çalışma Ortamı
+      description: İşletim sistemi, Rust sürümü (`rustc -V`), Python sürümü, GPU bilgisi.
+      placeholder: Ubuntu 24.04, Rust 1.80, NVIDIA RTX 4090

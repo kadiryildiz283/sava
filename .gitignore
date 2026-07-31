@@ -1,0 +1,27 @@
+# Rust build artifacts
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Temporary processing directories
+sava_temp_encode/
+sava_temp_decode/
+logs/
+
+# Video and archive binaries
+*.mp4
+*.sava
+*.db
+*.bin
+
+# Python cache & virtualenv
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+env/
+.env
+
+# IDE settings
+.vscode/
+.idea/

@@ -1,0 +1,14 @@
+# SAVA (Semantic AI Video Archive) - Python AI Sidecar Dependencies
+torch>=2.2.0
+torchvision
+diffusers>=0.27.0
+transformers>=4.38.0
+accelerate>=0.27.0
+controlnet-aux
+ultralytics>=8.1.0
+insightface>=0.7.3
+easyocr>=1.7.1
+opencv-python-headless
+numpy>=1.26.0
+pillow
+zstandard
