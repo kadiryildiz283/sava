@@ -112,7 +112,7 @@ Tested on a 1-Hour 4K Video Benchmark (`deneme.avi` - 53,970 frames):
 
 ### Prerequisites
 
-- **Rust**: Edition 2024 (`cargo` 1.85+)
+- **Rust Compiler**: Version `1.85+` (Edition `2024`)
 - **Python**: 3.10 or higher
 - **FFmpeg**: Installed and available in `$PATH`
 - **GPU (Optional but recommended)**: NVIDIA GPU with CUDA 12+ for neural inference
