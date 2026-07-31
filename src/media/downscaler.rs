@@ -60,7 +60,7 @@ impl MediaDownscaler {
         }
 
         // 2. Extract Audio Stream to OPUS Codec (32 kbps)
-        let _status_audio = Command::new("ffmpeg")
+        let status_audio = Command::new("ffmpeg")
             .arg("-y")
             .arg("-i")
             .arg(input_video.as_ref())
@@ -71,6 +71,11 @@ impl MediaDownscaler {
             .arg("32k")
             .arg(output_audio.as_ref())
             .status();
+
+        if status_audio.is_err() || !output_audio.as_ref().exists() {
+            // Write a dummy 0-byte file if video has no audio stream
+            let _ = std::fs::File::create(output_audio.as_ref());
+        }
 
         Ok(())
     }

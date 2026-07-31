@@ -91,9 +91,9 @@ class SAVAEncoderAI:
                 # Class 0: person, Class 11: stop sign
                 f_object.write(struct.pack("<IB", timestamp_ms, 2))  # timestamp, count=2
                 # Person BBox: (0.35, 0.20, 0.65, 0.85) -> normalized to 65535
-                f_object.write(struct.pack("<HHBBB", 0, 96, 22937, 13107, 42597))
+                f_object.write(struct.pack("<HHHHHH", 0, 96, 22937, 13107, 42597, 55705))
                 # Stop Sign BBox: (0.80, 0.15, 0.92, 0.35)
-                f_object.write(struct.pack("<HHBBB", 11, 92, 52428, 9830, 60293))
+                f_object.write(struct.pack("<HHHHHH", 11, 92, 52428, 9830, 60293, 22937))
 
                 # 4. face.bin: Deduplicated Face Track
                 if 101 not in face_gallery:
