@@ -1,26 +1,51 @@
-# SAVA Public Roadmap (2026-2027)
+# 🗺️ SAVA Project Roadmap
 
-SAVA (Semantic AI Video Archive) projesinin gelecek sürümleri için hedeflenen geliştirme yol haritası.
-
----
-
-## 🎯 v0.1.0 - Alfa Sürümü (Tamamlandı)
-- [x] Rust tabanlı `.sava` konteyner paketi ve demuxer/muxer (`src/container/`)
-- [x] FFmpeg tabanlı 72p/144p downscaler (`src/media/`)
-- [x] Python AI sidecar köprüsü (YOLO, InsightFace, EasyOCR entegrasyonu)
-- [x] ControlNet + Latent Diffusion simüle edilebilir restorasyon altyapısı
+This document outlines the strategic engineering roadmap and feature milestones for **SAVA (Semantic AI Video Archive)**.
 
 ---
 
-## 🚀 v0.5.0 - Beta Sürümü (Planlanan)
-- [ ] **Cross-Frame Temporal Attention**: Videodaki zamansal titremeyi (flicker) sıfırlayan AnimateDiff / SVD zaman serisi entegrasyonu.
-- [ ] **ONNX Runtime Rust Bindings**: Python bağımlılığını azaltmak için YOLO ve InsightFace çıkarımını doğrudan Rust `ort` kütüphanesine taşıma.
-- [ ] **Adaptive Bitrate Allocation**: Hareketli sahnelerde semantik kare sıklığını dinamik ayarlama.
-- [ ] **Zstandard Chunk Compression**: `.sava` içindeki binary track'lerin paralelleştirilmiş Zstd sıkıştırması.
+## 🎯 Phase 1: Core Foundation & IPC Architecture (v1.0-alpha) — *COMPLETED*
+- [x] High-performance Rust CLI application with `clap` parser.
+- [x] Zero-latency Stdio JSON-RPC IPC bridge connecting Rust host engine with Python AI sidecar.
+- [x] Dynamic, hot-reloadable `config.json` via Rust `arc-swap` crate.
+- [x] Rotated logging system (10 MB size limit / 7-day retention) with Zstd compression.
+- [x] Standardized `JsonResponse` output schema.
 
 ---
 
-## 🌟 v1.0.0 - Üretim Sürümü (Enterprise Ready)
-- [ ] **TensorRT / FP8 Hızlandırması**: GPU decoder çıkarım hızını real-time (30 FPS+) seviyesine çıkarma.
-- [ ] **C / WASM C-API Bindings**: SAVA Codec'inin C++ ve WebAssembly (tarayıcı içi izleme) kütüphane bağlamları.
-- [ ] **Streaming SAVA Stream Protocol**: Parçalı (.sava chunk) canlı akış (Live Streaming) desteği.
+## 🚀 Phase 2: 10-Track Modular Binary Container (v2.0-beta) — *COMPLETED*
+- [x] Binary track layout design eliminating raw text JSON bloat.
+- [x] **Global Face Gallery Deduplication**: InsightFace 512-dim face embeddings stored once in a lookup dictionary (99.4% metadata size reduction).
+- [x] **4-bit Temporal Residual Depth Maps**: DepthAnything V2 depth maps with 4-bit nibble packing and inter-frame residual coding (98% size reduction).
+- [x] **Affine Global Camera Motion**: 12-byte camera transformation vectors for optical flow (`motion.bin`).
+- [x] OPUS audio extraction (`audio.opus`) & 72p H.264/H.265 low-res composition video stream (`lowres_video.mp4`).
+- [x] Unified ZIP/Zstd `.sava` binary container packing and unpacking engine.
+
+---
+
+## 🌐 Phase 3: Streaming & Real-Time Protocol (v3.0) — *IN PROGRESS*
+- [ ] **SAVA WebRTC Streamer**: Real-time streaming protocol pushing 72p skeleton video + binary semantic tracks over WebRTC channels.
+- [ ] **Adaptive Bitrate Track Selector**: Client-side dynamic switching of active binary tracks based on network bandwidth.
+- [ ] **Multi-GPU Parallel Pipeline**: Tokio async worker pool distributing neural feature extraction across multiple GPUs.
+
+---
+
+## ⚡ Phase 4: Hardware Acceleration & Edge Inference (v4.0) — *PLANNED*
+- [ ] **NVIDIA TensorRT Integration**: Quantized INT8/FP16 sidecar models for 10x faster feature extraction.
+- [ ] **DirectML & Apple Metal Backend**: Native acceleration on Windows/DirectX and macOS Apple Silicon (M1/M2/M3/M4).
+- [ ] **ONNX Runtime Sidecar**: Lightweight C++ sidecar daemon eliminating Python runtime overhead.
+
+---
+
+## 📱 Phase 5: Client Ecosystem & WebAssembly Decoder (v5.0) — *PLANNED*
+- [ ] **WASM Browser Decoder**: Native WebAssembly + WebGPU in-browser SAVA player for zero-install 4K generative playback.
+- [ ] **Mobile SDK (iOS & Android)**: Native Rust core SDK bindings for mobile video archiving applications.
+- [ ] **FFmpeg Demuxer Plugin**: Native `libsava` plugin allowing VLC, MPV, and FFmpeg to play `.sava` files directly.
+
+---
+
+## 💬 Community & Feedback
+
+Have ideas or feature requests for SAVA?
+- Join the discussion on [GitHub Discussions](https://github.com/kadiryildiz283/sava/discussions).
+- Submit bug reports or feature proposals on [GitHub Issues](https://github.com/kadiryildiz283/sava/issues).
