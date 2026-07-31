@@ -5,7 +5,7 @@
 ### *The Next-Generation Generative AI Video Codec & Container Architecture*
 
 [![License: MIT/Apache-2.0](https://img.shields.io/badge/License-MIT%2FApache--2.0-blue.svg)](LICENSE-MIT)
-[![Rust](https://img.shields.io/badge/Rust-2021%20Edition-orange.svg?logo=rust)](https://www.rust-lang.org/)
+[![Rust](https://img.shields.io/badge/Rust-2024%20Edition-orange.svg?logo=rust)](https://www.rust-lang.org/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-green.svg?logo=python)](https://www.python.org/)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/kadiryildiz283/sava/ci.yml?branch=main&label=CI)](https://github.com/kadiryildiz283/sava/actions)
 [![GitHub Stars](https://img.shields.io/github/stars/kadiryildiz283/sava?style=social)](https://github.com/kadiryildiz283/sava/stargazers)
@@ -112,7 +112,7 @@ Tested on a 1-Hour 4K Video Benchmark (`deneme.avi` - 53,970 frames):
 
 ### Prerequisites
 
-- **Rust**: Edition 2021 (`cargo` 1.75+)
+- **Rust**: Edition 2024 (`cargo` 1.85+)
 - **Python**: 3.10 or higher
 - **FFmpeg**: Installed and available in `$PATH`
 - **GPU (Optional but recommended)**: NVIDIA GPU with CUDA 12+ for neural inference

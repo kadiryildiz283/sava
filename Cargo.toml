@@ -1,7 +1,7 @@
 [package]
 name = "sava"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 authors = ["SAVA Architecture Team"]
 description = "Semantic AI Video Archive - Rust & Generative AI Codec"
 
