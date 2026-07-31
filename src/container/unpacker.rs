@@ -25,10 +25,7 @@ pub struct SAVAUnpacker;
 
 impl SAVAUnpacker {
     /// Unpacks all binary tracks and metadata.json from a `.sava` container file.
-    pub fn unpack<P: AsRef<Path>>(
-        sava_path: P,
-        output_dir: P,
-    ) -> Result<HashMap<String, PathBuf>> {
+    pub fn unpack<P: AsRef<Path>>(sava_path: P, output_dir: P) -> Result<HashMap<String, PathBuf>> {
         fs::create_dir_all(&output_dir)?;
         let file = File::open(&sava_path)
             .with_context(|| format!("Failed to open .sava file: {:?}", sava_path.as_ref()))?;

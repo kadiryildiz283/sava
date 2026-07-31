@@ -79,7 +79,10 @@ fn main() -> Result<()> {
             width,
             height,
         } => {
-            logger.log_action("ENCODE_START", &format!("Input: {:?}, Output: {:?}", input, output));
+            logger.log_action(
+                "ENCODE_START",
+                &format!("Input: {:?}, Output: {:?}", input, output),
+            );
 
             let target_width = width.unwrap_or(cfg.codec.default_lowres_width);
             let target_height = height.unwrap_or(cfg.codec.default_lowres_height);
@@ -91,7 +94,13 @@ fn main() -> Result<()> {
             let audio_path = temp_dir.join("audio.opus");
 
             // 1. Downscale 72p skeleton video and extract audio.opus
-            MediaDownscaler::downscale_video_and_audio(input, &lowres_video_path, &audio_path, target_width, target_height)?;
+            MediaDownscaler::downscale_video_and_audio(
+                input,
+                &lowres_video_path,
+                &audio_path,
+                target_width,
+                target_height,
+            )?;
 
             // 2. Python AI Sidecar Extractor (Generates binary tracks in temp_dir)
             let resp = ai_client.request_encode(
@@ -137,7 +146,10 @@ fn main() -> Result<()> {
             let archive_metadata = fs::metadata(output)?;
             let archive_size_mb = archive_metadata.len() as f64 / (1024.0 * 1024.0);
 
-            logger.log_action("ENCODE_SUCCESS", &format!("11-Track Archive Size: {:.2} MB", archive_size_mb));
+            logger.log_action(
+                "ENCODE_SUCCESS",
+                &format!("11-Track Archive Size: {:.2} MB", archive_size_mb),
+            );
 
             let json_resp = JsonResponse::success(
                 "SAVA Encoding completed successfully with 11 binary tracks (including Canny Edge)",
@@ -150,7 +162,10 @@ fn main() -> Result<()> {
             println!("{}", json_resp.to_json_string());
         }
         Commands::Decode { input, output } => {
-            logger.log_action("DECODE_START", &format!("Input: {:?}, Output: {:?}", input, output));
+            logger.log_action(
+                "DECODE_START",
+                &format!("Input: {:?}, Output: {:?}", input, output),
+            );
 
             let temp_dir = PathBuf::from(&cfg.storage.temp_decode_dir);
             fs::create_dir_all(&temp_dir)?;
@@ -166,7 +181,10 @@ fn main() -> Result<()> {
                 lowres_path.to_str().unwrap(),
                 temp_dir.to_str().unwrap(),
                 output.to_str().unwrap(),
-                (cfg.codec.default_target_width, cfg.codec.default_target_height),
+                (
+                    cfg.codec.default_target_width,
+                    cfg.codec.default_target_height,
+                ),
             )?;
 
             if resp.status != "SUCCESS" {
@@ -176,7 +194,10 @@ fn main() -> Result<()> {
                 return Ok(());
             }
 
-            logger.log_action("DECODE_SUCCESS", &format!("Restored 4K Video from binary tracks: {:?}", output));
+            logger.log_action(
+                "DECODE_SUCCESS",
+                &format!("Restored 4K Video from binary tracks: {:?}", output),
+            );
 
             let json_resp = JsonResponse::success(
                 "SAVA Decoding completed successfully",

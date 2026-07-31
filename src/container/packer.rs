@@ -19,9 +19,9 @@ use anyhow::{Context, Result};
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::Path;
-use zip::write::FileOptions;
 use zip::CompressionMethod;
 use zip::ZipWriter;
+use zip::write::FileOptions;
 
 pub struct SAVAPacker;
 
@@ -31,8 +31,12 @@ impl SAVAPacker {
         output_sava_path: P,
         binary_track_files: Vec<(&str, &Path)>,
     ) -> Result<()> {
-        let file = File::create(&output_sava_path)
-            .with_context(|| format!("Failed to create .sava container file: {:?}", output_sava_path.as_ref()))?;
+        let file = File::create(&output_sava_path).with_context(|| {
+            format!(
+                "Failed to create .sava container file: {:?}",
+                output_sava_path.as_ref()
+            )
+        })?;
 
         let mut zip = ZipWriter::new(file);
         let options = FileOptions::default()

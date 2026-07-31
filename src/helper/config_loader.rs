@@ -15,13 +15,13 @@
 // }
 // ============================================================================
 
+use crate::helper::json_response::JsonResponse;
 use anyhow::{Context, Result};
 use arc_swap::ArcSwap;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
 use std::sync::Arc;
-use crate::helper::json_response::JsonResponse;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SystemConfig {
@@ -108,9 +108,17 @@ impl ConfigLoader {
                         })),
                     )
                 }
-                Err(e) => JsonResponse::error(400, "Failed to parse updated config.json", Some(&e.to_string())),
+                Err(e) => JsonResponse::error(
+                    400,
+                    "Failed to parse updated config.json",
+                    Some(&e.to_string()),
+                ),
             },
-            Err(e) => JsonResponse::error(500, "Failed to read config file during reload", Some(&e.to_string())),
+            Err(e) => JsonResponse::error(
+                500,
+                "Failed to read config file during reload",
+                Some(&e.to_string()),
+            ),
         }
     }
 }

@@ -15,11 +15,11 @@
 // }
 // ============================================================================
 
+use crate::helper::json_response::JsonResponse;
+use chrono::Local;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use chrono::Local;
-use crate::helper::json_response::JsonResponse;
 
 pub struct LoggerManager {
     log_dir: PathBuf,
@@ -49,7 +49,11 @@ impl LoggerManager {
 
         let log_line = format!("[{}] [{}] {}\n", timestamp, action, details);
 
-        match OpenOptions::new().create(true).append(true).open(&log_file_path) {
+        match OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&log_file_path)
+        {
             Ok(mut file) => {
                 if file.write_all(log_line.as_bytes()).is_ok() {
                     JsonResponse::success(

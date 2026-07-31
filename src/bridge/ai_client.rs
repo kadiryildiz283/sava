@@ -1,8 +1,8 @@
-use anyhow::{anyhow, Result};
+use crate::bridge::protocol::{AIServiceResponse, DecodeRequest, EncodeRequest};
+use anyhow::{Result, anyhow};
+use std::io::Write;
 use std::path::Path;
 use std::process::{Command, Stdio};
-use std::io::Write;
-use crate::bridge::protocol::{DecodeRequest, EncodeRequest, AIServiceResponse};
 
 pub struct PythonAIClient {
     sidecar_script_path: String,
@@ -74,8 +74,13 @@ impl PythonAIClient {
             return Err(anyhow!("Python AI Sidecar Error: {}", raw_stderr));
         }
 
-        let resp: AIServiceResponse = serde_json::from_str(raw_stdout.trim())
-            .map_err(|e| anyhow!("Failed to parse Python sidecar JSON response: {} (raw: {})", e, raw_stdout))?;
+        let resp: AIServiceResponse = serde_json::from_str(raw_stdout.trim()).map_err(|e| {
+            anyhow!(
+                "Failed to parse Python sidecar JSON response: {} (raw: {})",
+                e,
+                raw_stdout
+            )
+        })?;
 
         Ok(resp)
     }
