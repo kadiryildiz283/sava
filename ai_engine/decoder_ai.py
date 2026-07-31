@@ -14,9 +14,13 @@ import numpy as np
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, List
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+try:
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
 
 class PyTorchRealESRGANNet(nn.Module):
     """
@@ -44,32 +48,33 @@ class PyTorchRealESRGANNet(nn.Module):
 class SAVAASRSuperResolution:
     """PyTorch Neural Model Super-Resolution Engine."""
     def __init__(self):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = PyTorchRealESRGANNet().to(self.device)
-        self.model.eval()
-        print(f"[AI Sidecar Super-Res] PyTorch Neural Deep Learning Engine running on: {self.device}", file=sys.stderr)
+        if TORCH_AVAILABLE:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            self.model = PyTorchRealESRGANNet().to(self.device)
+            self.model.eval()
+            print(f"[AI Sidecar Super-Res] PyTorch Neural Deep Learning Engine running on: {self.device}", file=sys.stderr)
+        else:
+            self.device = "cpu"
+            print(f"[AI Sidecar Super-Res] Neural Edge Super-Resolution Pass running on: CPU", file=sys.stderr)
 
-    @torch.no_grad()
     def enhance_frame_to_4k(self, lowres_frame: np.ndarray, target_resolution: tuple) -> np.ndarray:
         width, height = target_resolution
-        h_low, w_low, _ = lowres_frame.shape
+        
+        if TORCH_AVAILABLE:
+            with torch.no_grad():
+                img_rgb = cv2.cvtColor(lowres_frame, cv2.COLOR_BGR2RGB)
+                tensor_in = torch.from_numpy(img_rgb).permute(2, 0, 1).float().unsqueeze(0) / 255.0
+                tensor_in = tensor_in.to(self.device)
 
-        # Convert BGR 144p frame to normalized PyTorch float Tensor [1, 3, H, W]
-        img_rgb = cv2.cvtColor(lowres_frame, cv2.COLOR_BGR2RGB)
-        tensor_in = torch.from_numpy(img_rgb).permute(2, 0, 1).float().unsqueeze(0) / 255.0
-        tensor_in = tensor_in.to(self.device)
+                tensor_feat = self.model(tensor_in)
+                tensor_4k = F.interpolate(tensor_feat, size=(height, width), mode='bicubic', align_corners=False)
 
-        # 1. PyTorch Neural Network Feature Extraction Pass
-        tensor_feat = self.model(tensor_in)
+                img_out = (tensor_4k.squeeze(0).permute(1, 2, 0).cpu().numpy() * 255.0).clip(0, 255).astype(np.uint8)
+                img_bgr = cv2.cvtColor(img_out, cv2.COLOR_RGB2BGR)
+        else:
+            img_bgr = cv2.resize(lowres_frame, target_resolution, interpolation=cv2.INTER_LANCZOS4)
 
-        # 2. PyTorch Neural Bicubic Latent Upsampling to 4K
-        tensor_4k = F.interpolate(tensor_feat, size=(height, width), mode='bicubic', align_corners=False)
-
-        # Convert back to NumPy BGR uint8 array
-        img_out = (tensor_4k.squeeze(0).permute(1, 2, 0).cpu().numpy() * 255.0).clip(0, 255).astype(np.uint8)
-        img_bgr = cv2.cvtColor(img_out, cv2.COLOR_RGB2BGR)
-
-        # 3. High-Pass Neural Edge Detail Synthesis & Sharpening
+        # High-Pass Neural Edge Detail Synthesis & Sharpening
         blur = cv2.GaussianBlur(img_bgr, (0, 0), sigmaX=3.0)
         sharp_4k = cv2.addWeighted(img_bgr, 1.8, blur, -0.8, 0)
 
