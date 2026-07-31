@@ -115,6 +115,7 @@ fn main() -> Result<()> {
             let ocr_path = temp_dir.join("ocr.bin");
             let latent_path = temp_dir.join("latent.bin");
             let helper_path = temp_dir.join("helper.bin");
+            let edge_path = temp_dir.join("edge.bin");
             let metadata_path = temp_dir.join("metadata.json");
 
             let binary_tracks = vec![
@@ -127,6 +128,7 @@ fn main() -> Result<()> {
                 ("ocr.bin", ocr_path.as_path()),
                 ("latent.bin", latent_path.as_path()),
                 ("helper.bin", helper_path.as_path()),
+                ("edge.bin", edge_path.as_path()),
                 ("metadata.json", metadata_path.as_path()),
             ];
 
@@ -135,10 +137,10 @@ fn main() -> Result<()> {
             let archive_metadata = fs::metadata(output)?;
             let archive_size_mb = archive_metadata.len() as f64 / (1024.0 * 1024.0);
 
-            logger.log_action("ENCODE_SUCCESS", &format!("10-Track Archive Size: {:.2} MB", archive_size_mb));
+            logger.log_action("ENCODE_SUCCESS", &format!("11-Track Archive Size: {:.2} MB", archive_size_mb));
 
             let json_resp = JsonResponse::success(
-                "SAVA Encoding completed successfully with 10 binary tracks",
+                "SAVA Encoding completed successfully with 11 binary tracks (including Canny Edge)",
                 Some(serde_json::json!({
                     "input_video": input,
                     "output_archive": output,

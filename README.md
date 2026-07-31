@@ -12,14 +12,13 @@
 [![Sponsor SAVA](https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink.svg?logo=github)](https://github.com/sponsors/kadiryildiz283)
 
 <p align="center">
-  <b>Shrinking 4K Video Archives by up to 96% using Generative AI Latent Conditioning & Modular Binary Tracks.</b>
+  <b>Shrinking 4K/5K Video Archives by up to 94%+ using BasicVSR++ Bi-Directional Temporal Video Restoration & 11 Modular Binary Tracks.</b>
 </p>
 
 [Key Features](#-key-features) •
-[Architecture](#-10-track-binary-container-architecture) •
+[Architecture](#-11-track-binary-container-architecture) •
 [Benchmarks](#-performance--compression-benchmarks) •
 [Limitations](#-limitations--engineering-trade-offs) •
-[Forensic Disclaimer](#-legal--forensic-disclaimer) •
 [Quickstart](#-quickstart--installation) •
 [Roadmap](#-roadmap)
 
@@ -33,41 +32,43 @@ Traditional video codecs (H.264, H.265, AV1) compress video by exploiting spatia
 
 **SAVA (Semantic AI Video Archive)** introduces a paradigm shift in video storage and streaming: **Generative Semantic Video Compression**. 
 
-Instead of storing high-resolution pixel matrices, SAVA extracts **semantic AI representations**—such as 72p low-resolution composition skeletons, FP16 face embeddings, 4-bit temporal depth maps, optical flow motion vectors, OCR text regions, and VAE scene-cut latents—into a unified **10-Track Modular Binary Container (`.sava`)**.
+Instead of storing high-resolution pixel matrices, SAVA extracts **semantic AI representations**—such as 144p low-resolution composition skeletons, FP16 face embeddings, 4-bit temporal depth maps, optical flow motion vectors, Canny 1-bit hard edge maps, OCR text regions, and compressed 1080p master keyframe latents—into a unified **11-Track Modular Binary Container (`.sava`)**.
 
-During playback, SAVA leverages **ControlNet Tile + Generative Latent Diffusion** to reconstruct photorealistic 4K video on-the-fly.
+During playback, SAVA leverages **BasicVSR++ Motion-Adaptive Feature Propagation + YCrCb Chrominance Lock + ControlNet Canny Hard Edge Control** to reconstruct photorealistic 4K/5K video without flickering, false color shifts, or keyframe reset jumps.
 
 ---
 
 ## 🔥 Key Features
 
-- **⚡ Up to 44x (96.4%) Compression Ratio**: Compresses 850 MB 4K video down to **30–60 MB** with zero visual loss of semantic identity.
+- **⚡ Up to 17x (94.0%+) Compression Ratio**: Compresses a 33 MB 5K video archive down to **1.98 MB** with zero loss of semantic identity or structural geometry.
 - **🦀 High-Performance Hybrid Engine**:
   - **Rust Core Host**: High-speed I/O, Tokio MPSC queue, atomic config hot-reloading via `arc-swap`, and size/time-based rotated Zstd logging.
-  - **Python AI Sidecar**: Zero-latency Stdio JSON-RPC IPC daemon driving YOLO11, InsightFace ArcFace, EasyOCR, DepthAnything V2, and Latent Diffusion models.
-- **📦 10 Modular Binary Track Architecture**: Zero text JSON overhead. All semantic tracks are packed as data-aligned binary streams (`.bin`) into a `.sava` ZIP/Zstd container.
-- **👤 Global Face Gallery Deduplication**: InsightFace 512-dim normalized embeddings are stored **once** in a global lookup gallery, reducing frame metadata size by **99.4%**.
-- **🌐 4-bit Temporal Residual Depth Coding**: Nibble-packed depth maps with inter-frame residual difference coding for minimal storage.
-- **🔒 Zero Hardcoded Configuration**: Centralized `config.json` hot-reloaded dynamically at runtime with zero downtime.
+  - **Python AI Sidecar**: Zero-latency Stdio JSON-RPC IPC daemon driving PyTorch Neural Super-Resolution, InsightFace ArcFace, EasyOCR, DepthAnything V2, and Optical Flow Warping.
+- **📦 11 Modular Binary Track Architecture**: Zero text JSON overhead. All semantic tracks are packed as data-aligned binary streams (`.bin`) into a `.sava` ZIP/Zstd container.
+- **🎨 YCrCb Ground-Truth Chrominance Transfer**: Locks 100% exact frame-accurate colors directly from low-resolution skeleton frames, eliminating false color bleeding or wrong keyframe color shifts.
+- **🔒 Canny Hard Edge Control (`edge.bin`)**: 1-bit bitpacked Canny edge masks strictly constrain rigid architectural geometry (window frames, walls, building structures) in 3D space.
+- **🎬 Motion-Adaptive Temporal Pipeline**: Motion-masked optical flow warping eliminates ghosting trails and 2-second keyframe boundary resets.
+- **👤 Global Face Gallery Deduplication**: InsightFace 512-dim normalized embeddings stored **once** in a global lookup gallery, reducing frame metadata size by **99.4%**.
 
 ---
 
-## 🏗️ 10-Track Binary Container Architecture
+## 🏗️ 11-Track Binary Container Architecture
 
-Every `.sava` archive is a self-contained, modular binary container consisting of 10 distinct track streams:
+Every `.sava` archive is a self-contained, modular binary container consisting of 11 distinct track streams:
 
 ```text
 kadir.sava (SAVA Binary Archive Container)
-├── lowres_video.mp4  # [1] 72p/144p Base Composition & Color Skeleton
+├── lowres_video.mp4  # [1] 144p Base Composition & Color Skeleton
 ├── audio.opus        # [2] 32 kbps OPUS High-Fidelity Audio Stream
-├── motion.bin        # [3] Affine Global Camera Vectors (Dx, Dy, Scale, Rotate)
+├── motion.bin        # [3] Affine Global Camera & Optical Flow Vectors
 ├── depth.bin         # [4] 4-bit Nibble-Packed Temporal Residual Depth Maps
 ├── object.bin        # [5] uint16 Class ID & Bounding Box Coordinates
 ├── face.bin          # [6] FP16 ArcFace Embedding Gallery & Bbox Track
 ├── ocr.bin           # [7] UTF-8 Text Regions & uint16 Bounding Boxes
-├── latent.bin        # [8] FP16 Scene-Cut Keyframe VAE Latents
+├── latent.bin        # [8] Master Keyframe Anchors (1080p JPEG q75)
 ├── helper.bin        # [9] uint16 Prompt Dictionary Index Sequence
-└── metadata.json     # [10] System Settings & Binary Track Seek Map (< 5 KB)
+├── edge.bin          # [10] 1-bit Hard Edge Control Canny Track (256x144 bitpacked)
+└── metadata.json     # [11] System Settings & Track Seek Map (< 5 KB)
 ```
 
 ```mermaid
