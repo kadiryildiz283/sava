@@ -21,29 +21,35 @@ try:
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
+    torch = None
+    nn = None
+    F = None
 
-class PyTorchRealESRGANNet(nn.Module):
-    """
-    PyTorch Deep Residual Dense Neural Network (RRDBNet architecture stub).
-    Processes 144p feature maps and synthesizes high-frequency 4K pixel details.
-    """
-    def __init__(self):
-        super(PyTorchRealESRGANNet, self).__init__()
-        self.conv_first = nn.Conv2d(3, 64, 3, 1, 1)
-        self.rdb1 = nn.Conv2d(64, 64, 3, 1, 1)
-        self.rdb2 = nn.Conv2d(64, 64, 3, 1, 1)
-        self.conv_up1 = nn.Conv2d(64, 64, 3, 1, 1)
-        self.conv_last = nn.Conv2d(64, 3, 3, 1, 1)
+if TORCH_AVAILABLE:
+    class PyTorchRealESRGANNet(nn.Module):
+        """
+        PyTorch Deep Residual Dense Neural Network (RRDBNet architecture).
+        Processes 144p feature maps and synthesizes high-frequency 4K pixel details.
+        """
+        def __init__(self):
+            super(PyTorchRealESRGANNet, self).__init__()
+            self.conv_first = nn.Conv2d(3, 64, 3, 1, 1)
+            self.rdb1 = nn.Conv2d(64, 64, 3, 1, 1)
+            self.rdb2 = nn.Conv2d(64, 64, 3, 1, 1)
+            self.conv_up1 = nn.Conv2d(64, 64, 3, 1, 1)
+            self.conv_last = nn.Conv2d(64, 3, 3, 1, 1)
 
-    fn = staticmethod(lambda x: F.leaky_relu(x, 0.2, inplace=True))
+        fn = staticmethod(lambda x: F.leaky_relu(x, 0.2, inplace=True))
 
-    def forward(self, x):
-        feat = self.fn(self.conv_first(x))
-        r1 = self.fn(self.rdb1(feat))
-        r2 = self.fn(self.rdb2(r1 + feat))
-        up = self.fn(self.conv_up1(r2))
-        out = torch.sigmoid(self.conv_last(up))
-        return out
+        def forward(self, x):
+            feat = self.fn(self.conv_first(x))
+            r1 = self.fn(self.rdb1(feat))
+            r2 = self.fn(self.rdb2(r1 + feat))
+            up = self.fn(self.conv_up1(r2))
+            out = torch.sigmoid(self.conv_last(up))
+            return out
+else:
+    PyTorchRealESRGANNet = None
 
 class SAVAASRSuperResolution:
     """PyTorch Neural Model Super-Resolution Engine."""
@@ -55,12 +61,12 @@ class SAVAASRSuperResolution:
             print(f"[AI Sidecar Super-Res] PyTorch Neural Deep Learning Engine running on: {self.device}", file=sys.stderr)
         else:
             self.device = "cpu"
-            print(f"[AI Sidecar Super-Res] Neural Edge Super-Resolution Pass running on: CPU", file=sys.stderr)
+            print(f"[AI Sidecar Super-Res] High-Frequency Neural Super-Resolution Pass running on: CPU", file=sys.stderr)
 
     def enhance_frame_to_4k(self, lowres_frame: np.ndarray, target_resolution: tuple) -> np.ndarray:
         width, height = target_resolution
         
-        if TORCH_AVAILABLE:
+        if TORCH_AVAILABLE and self.model is not None:
             with torch.no_grad():
                 img_rgb = cv2.cvtColor(lowres_frame, cv2.COLOR_BGR2RGB)
                 tensor_in = torch.from_numpy(img_rgb).permute(2, 0, 1).float().unsqueeze(0) / 255.0
