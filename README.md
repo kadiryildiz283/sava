@@ -18,10 +18,10 @@
 [Key Features](#-key-features) •
 [Architecture](#-10-track-binary-container-architecture) •
 [Benchmarks](#-performance--compression-benchmarks) •
+[Limitations](#-limitations--engineering-trade-offs) •
+[Forensic Disclaimer](#-legal--forensic-disclaimer) •
 [Quickstart](#-quickstart--installation) •
-[Usage](#-cli-usage) •
-[Roadmap](#-roadmap) •
-[Sponsorship](#-support--sponsorship)
+[Roadmap](#-roadmap)
 
 ---
 
@@ -99,12 +99,36 @@ graph TD
 
 Tested on a 1-Hour 4K Video Benchmark (`deneme.avi` - 53,970 frames):
 
-| Metric | Original 4K Video | Unoptimized Text JSON | 🔥 SAVA 10-Track Binary | Saving / Gain |
+| Metric | Original 4K Video | Unoptimized Text JSON | 🔥 SAVA 10-Track Binary | Saving / Performance |
 | :--- | :--- | :--- | :--- | :--- |
 | **Archive File Size** | **854 MB** | **263.7 MB** | **62.64 MB** 🚀 | **92.7% Space Saved** |
 | **Compression Ratio** | 1.0x | 3.2x | **13.6x - 43.9x** | **Up to 44x Smaller** |
 | **Encode Speed** | - | 1m 39s | **~50s (Fast Pass)** | **2x Speedup** |
-| **Decode Latency** | - | 0.49s/frame | **< 0.12s/frame** | **Real-time 4K Playback** |
+| **Parallel Decode Throughput** | - | 0.49s/frame | **13.25s Total (4,072 FPS)** | **Multi-Threaded FFmpeg Stream** |
+| **Full Generative Latent Pass** | - | - | **~8.3 FPS (CPU) / 30+ FPS (RTX 4090)** | **Near Real-time Inference** |
+
+---
+
+## ⚖️ Limitations & Engineering Trade-offs
+
+SAVA is engineered for maximum storage efficiency, but operates on an explicit architectural trade-off: **Shifting Storage & Bandwidth Cost to Compute (GPU/VRAM)**.
+
+1. **Storage vs. Compute Shift**: While SAVA reduces bandwidth and storage requirements by up to 96%, decoding full neural diffusion passes requires client-side GPU compute (min. 6GB VRAM for real-time 1080p/4K synthesis).
+2. **Generative Synthesis Non-Determinism**: Minor microscopic texture details (e.g., individual foliage leaves or background grain) are synthesized generatively by diffusion models guided by semantic metadata rather than stored pixel-for-pixel.
+
+---
+
+## ⚖️ Legal & Forensic Disclaimer
+
+> [!WARNING]  
+> **NON-FORENSIC USE CASE**: SAVA is designed specifically for **media archiving, cloud storage cost reduction, streaming, and entertainment**. 
+> Because SAVA reconstructs video using Generative AI conditioning (ControlNet, IP-Adapter, Latent Diffusion), it is **NOT bit-exact (not pixel-identical)** to the source file. 
+> 
+> **DO NOT USE SAVA FOR**:
+> - Courtroom legal evidence
+> - Security camera surveillance forensics
+> - Medical diagnostic imaging (e.g., MRI/CT scans)
+> - Scientific telemetry data requiring bit-perfect verification
 
 ---
 
@@ -201,9 +225,9 @@ SAVA features zero hardcoded static variables. All operational parameters are go
 
 - [x] **v1.0-alpha**: Rust CLI Core + Python AI Sidecar Stdio IPC Bridge.
 - [x] **v2.0-beta**: 10-Track Binary Container (`.bin`) with Global Face Deduplication & 4-bit Depth Packing.
-- [ ] **v3.0**: Real-Time WebRTC Streaming Protocol for SAVA Binary Tracks.
-- [ ] **v4.0**: Hardware-Accelerated TensorRT & DirectML Sidecar inference.
-- [ ] **v5.0**: Native WebAssembly (WASM) browser decoder.
+- [ ] **v3.0**: Real-Time Streaming integration leveraging standard Rust crates (`webrtc-rs` / `GStreamer`).
+- [ ] **v4.0**: Hardware-Accelerated TensorRT & DirectML Sidecar inference for ultra-low latency.
+- [ ] **v5.0 (Experimental R&D)**: Exploration of WebAssembly (WASM) + WebGPU in-browser generative decoding targets.
 
 See [ROADMAP.md](ROADMAP.md) for detailed milestones.
 
